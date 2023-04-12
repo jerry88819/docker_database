@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgres:
+    container_name: 'postgres'
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./docker-pg-init-scripts:/docker-entrypoint-initdb.d
+      - ./pgdata:/var/lib/postgresql/data/
+    # if you want to save pg data
+    ports:
+      - "5433:5432"
+  postgres-client:
+    container_name: 'postgres-client'
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "dcard@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "dcard"
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
+  backend:
+    image: 'docker_database'
+    container_name: 'docker_database'
+    build: ./
+    # replace original .env file defined value
+    environment:
+      DB_HOST: postgres
+    restart: always
+    ports:
+    - "8080:8080"
+    depends_on:
+      - postgres
